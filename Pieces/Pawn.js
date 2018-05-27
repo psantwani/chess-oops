@@ -5,13 +5,19 @@ class Pawn extends IPiece {
     const b = board,
       s = startPosition,
       e = endPosition;
+
+    if (!this.checkIfMoveWithinBounds(s, e)) {
+      return {
+        err: "Invalid move",
+        result: false
+      };
+    }
+
     if (
       this.singleStep(b, s, e) ||
       this.twoStep(b, s, e) ||
       this.killerMove(b, s, e)
     ) {
-      board[e[0]][e[1]] = board[s[0]][s[1]];
-      board[s[0]][s[1]] = "";
       this.currentPosition = endPosition;
       return { err: null, result: true };
     } else {
@@ -37,14 +43,15 @@ class Pawn extends IPiece {
   twoStep(board, startPosition, endPosition) {
     const step = this.color === "white" ? -2 : 2;
     const pieceAtEndPosition = board[endPosition[0]][endPosition[1]];
-
+    const direction = this.getMoveDirection(startPosition, endPosition);
     if (
+      direction &&
       !pieceAtEndPosition &&
       !this.checkFirstPieceInPath(
         board,
         startPosition,
         endPosition,
-        "vertical"
+        direction
       ) &&
       this.currentPosition === this.initialPosition &&
       endPosition[0] === startPosition[0] + step &&

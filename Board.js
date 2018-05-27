@@ -1,18 +1,18 @@
 const Table = require("cli-table");
 const { Pawn, Bishop, Knight, Rook, King, Queen } = require("./Pieces");
 const mapping = {
-  "♜": { type: Rook, color: "black" },
-  "♞": { type: Knight, color: "black" },
-  "♝": { type: Bishop, color: "black" },
-  "♛": { type: Queen, color: "black" },
-  "♚": { type: King, color: "black" },
-  "♟": { type: Pawn, color: "black" },
-  "♙": { type: Pawn, color: "white" },
-  "♖": { type: Rook, color: "white" },
-  "♘": { type: Knight, color: "white" },
-  "♗": { type: Bishop, color: "white" },
-  "♕": { type: Queen, color: "white" },
-  "♔": { type: King, color: "white" }
+  "♜": { name: "Rook", type: Rook, color: "black" },
+  "♞": { name: "Knight", type: Knight, color: "black" },
+  "♝": { name: "Bishop", type: Bishop, color: "black" },
+  "♛": { name: "Queen", type: Queen, color: "black" },
+  "♚": { name: "King", type: King, color: "black" },
+  "♟": { name: "Bishop", type: Pawn, color: "black" },
+  "♙": { name: "Pawn", type: Pawn, color: "white" },
+  "♖": { name: "Rook", type: Rook, color: "white" },
+  "♘": { name: "Knight", type: Knight, color: "white" },
+  "♗": { name: "Bishop", type: Bishop, color: "white" },
+  "♕": { name: "Queen", type: Queen, color: "white" },
+  "♔": { name: "King", type: King, color: "white" }
 };
 
 class Board {
@@ -36,7 +36,7 @@ class Board {
       for (let j = 0; j < row.length; j++) {
         const piece = mapping[this.displaGrid[i][j]];
         if (piece) {
-          gridRow.push(new piece.type(piece.color, [i, j]));
+          gridRow.push(new piece.type(piece.name, piece.color, [i, j]));
         } else {
           gridRow.push("");
         }
@@ -70,10 +70,22 @@ class Board {
     } else {
       const { err, result } = piece.move(this.grid, startPosition, endPosition);
       if (result) {
+        const pieceAtEndPosition = this.grid[endPosition[0]][endPosition[1]];
+        const gameOver = pieceAtEndPosition.name === "King" ? true : false;
+        this.grid[endPosition[0]][endPosition[1]] = this.grid[startPosition[0]][
+          startPosition[1]
+        ];
+        this.grid[startPosition[0]][startPosition[1]] = "";
+
         this.displaGrid[endPosition[0]][endPosition[1]] = this.displaGrid[
           startPosition[0]
         ][startPosition[1]];
         this.displaGrid[startPosition[0]][startPosition[1]] = "";
+
+        if (gameOver) {
+          console.log(`Game Over. ${player.name} wins.`);
+          return { err: null, result: "Game Over" };
+        }
       }
       return { err, result };
     }
